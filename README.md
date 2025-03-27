@@ -1,5 +1,5 @@
 # Современные шаблоны для Django-Allauth с Tailwind CSS 4 и DaisyUI 5
-(screenshot.png)
+(screenshots.png)
 
 ## Русский
 
