@@ -1,0 +1,51 @@
+{% load i18n %}
+<c-app>
+    <content class="block max-w-2xl mx-auto md:p-12 min-h-screen bg-base-300">
+        <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-xl p-4">
+            <ul>
+                {% if user.is_authenticated %}
+                {% url 'account_email' as email_url_ %}
+                {% if email_url_ %}
+                <li>
+                    <a href="{{ email_url_ }}">{% trans "Change Email" %}</a>
+                </li>
+                {% endif %}
+                {% url 'account_change_password' as change_password_url_ %}
+                {% if change_password_url_ %}
+                <li>
+                    <a href="{{ change_password_url_ }}">{% trans "Change Password" %}</a>
+                </li>
+                {% endif %}
+                {% url 'socialaccount_connections' as connections_url_ %}
+                {% if connections_url_ %}
+                <li>
+                    <a href="{{ connections_url_ }}">{% trans "Account Connections" %}</a>
+                </li>
+                {% endif %}
+                {% url 'mfa_index' as mfa_url_ %}
+                {% if mfa_url_ %}
+                <li>
+                    <a href="{{ mfa_url_ }}">{% trans "Two-Factor Authentication" %}</a>
+                </li>
+                {% endif %}
+                {% url 'usersessions_list' as usersessions_list_url_ %}
+                {% if usersessions_list_url_ %}
+                <li>
+                    <a href="{{ usersessions_list_url_ }}">{% trans "Sessions" %}</a>
+                </li>
+                {% endif %}
+                {% url 'account_logout' as logout_url_ %}
+                {% if logout_url_ %}
+                <li>
+                    <a href="{{ logout_url_ }}">{% trans "Sign Out" %}</a>
+                </li>
+                {% endif %}
+                {% endif %}
+            </ul>
+            <div class="card">
+            {% block content %}
+            {% endblock content %}
+            </div>
+        </div>
+    </content>
+</c-app>

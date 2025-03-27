@@ -1,0 +1,37 @@
+{% load widget_tweaks %}
+<div class="my-4">
+  {% for field in attrs.form %}
+    <div class="form-control">
+      {% if field.field.widget.input_type != "checkbox" and field.field.widget.input_type != "radio" and field.label %}
+        <label class="label" for="{{ field.id_for_label }}">
+          <span class="label-text">{{ field.label }}</span>
+        </label>
+      {% endif %}
+
+      {% if field.field.widget.input_type == "checkbox" or field.field.widget.input_type == "radio" %}
+        <label class="label cursor-pointer size-6">
+          {% render_field field class="size-6 checkbox checkbox-info" %}
+          {% if field.label %}
+            <span class="label-text">{{ field.label }}</span>
+          {% endif %}
+        </label>
+      {% elif field.field.widget.input_type == "select" %}
+        {% render_field field class="select select-bordered w-full" %}
+      {% else %}
+        {% render_field field class="input input-bordered w-full" %}
+      {% endif %}
+
+      {% if field.help_text %}
+        <span class="label-text-alt text-neutral-500">
+          {{ field.help_text }}
+        </span>
+      {% endif %}
+
+      {% if field.errors %}
+        <div class="text-error text-sm mt-1">
+          {{ field.errors }}
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>

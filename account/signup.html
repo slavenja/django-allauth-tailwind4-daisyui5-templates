@@ -1,0 +1,208 @@
+{% load widget_tweaks %}
+<c-app xmlns:x-bind="http://www.w3.org/1999/xhtml" xmlns:x-on="http://www.w3.org/1999/xhtml">
+    <div class="hero bg-base-200 min-h-screen">
+        <div class="hero-content flex-col lg:flex-row">
+            <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-xl">
+                <div class="card-body">
+                    <h1 class="card-title">Регистрация</h1>
+                    <form class="space-y-4" method="post" x-data="{
+                    showBar: true,
+                    showMessage: true,
+                    message: 'Создайте надёжный пароль',
+                    password: '',
+                    strength: 0,
+                    checkStrength() {
+                        let score = 0;
+                        if (this.password.length >= 8) {
+                            score += 40; // Базовые 8 символов
+                            if (/[0-9]/.test(this.password)) score += 20; // Цифры
+                            if (/[a-z]/.test(this.password) && /[A-Z]/.test(this.password)) score += 20; // Разный регистр
+                            if (/[^A-Za-z0-9]/.test(this.password)) score += 20; // Спецсимволы
+                        } else if (this.password.length > 0) {
+                            score = 20; // Меньше 8 символов
+                        }
+                        this.strength = Math.min(score, 100); // Ограничение до 100
+                        if (score === 0) this.message = 'Создайте надёжный пароль';
+                        else if (score <= 20) this.message = 'Слишком короткий!';
+                        else if (score <= 40) this.message = 'Слабый';
+                        else if (score <= 60) this.message = 'Средний';
+                        else if (score <= 80) this.message = 'Хороший';
+                        else this.message = 'Сильный';
+                    }
+                }">
+                        {% csrf_token %}
+
+                        <!-- Поле Email -->
+                        <label class="input validator w-full">
+                            <svg class="h-[1em] opacity-50" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                   stroke-width="2.5">
+                                    <rect height="16" rx="2" width="20" x="2" y="4"></rect>
+                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                                </g>
+                            </svg>
+                            {{ form.email|attr:"placeholder:e-mail" }}
+                        </label>
+                        {% if form.email.errors %}
+                        <div class="text-xs text-error">{{ form.email.errors }}</div>
+                        {% endif %}
+
+                        <!-- Поле Имя -->
+                        <label class="input validator w-full">
+                            <svg class="h-[1em] opacity-50" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                   stroke-width="2.5">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </g>
+                            </svg>
+                            {{
+                            form.first_name|attr:"title:Пишите по-русски."
+                            |attr:"type:input"|attr:"placeholder:Имя"|attr:"minlength:3"|attr:"pattern:[А-Яа-яЁё][А-Яа-яЁё\-]*"
+                            }}
+                        </label>
+                        {% if form.first_name.errors %}
+                        <div class="text-xs text-error">{{ form.first_name.errors }}</div>
+                        {% endif %}
+
+                        <!-- Поле Отчество -->
+                        <label class="floating-label">
+                            <span>{{ form.patronymic.label }}</span>
+                            {{ form.patronymic|add_class:"input input-md w-full"|attr:"placeholder:Отчество
+                            (необязательно)"
+                            }}
+                        </label>
+                        {% if form.patronymic.errors %}
+                        <div class="text-xs text-error">{{ form.patronymic.errors }}</div>
+                        {% endif %}
+
+                        <!-- Message -->
+                        <p :class="{
+                        'text-base-content': strength === 0,
+                        'text-error': strength <= 40,
+                        'text-warning': strength <= 60,
+                        'text-success': strength > 60,
+                    }" class="mt-1 text-sm" x-cloak x-show="showMessage" x-text="message"></p>
+                        <div class="text-xs text-error">{{ form.password1.errors }}</div>
+
+                        <!-- Progress Bar -->
+                        <div aria-label="Password strength" aria-valuemax="100" aria-valuemin="0"
+                             class="mt-2 h-1.5 w-full rounded-full bg-base-300"
+                             role="progressbar" x-bind:aria-valuenow="strength" x-cloak
+                             x-show="showBar">
+                            <div :class="{
+                            'bg-error': strength <= 40,
+                            'bg-warning': strength <= 60,
+                            'bg-success': strength > 60,
+                        }" class="h-1.5 rounded-full transition-all duration-300"
+                                 x-bind:style="{'width': strength + '%'}"></div>
+                        </div>
+
+                        <!-- Поле Пароль с индикатором -->
+                        <label class="input w-full"
+                               x-data="{ showPassword1: false, get inputType() { return this.showPassword1 ? 'text' : 'password' }}">
+                            <svg class="h-[1em] opacity-50" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                   stroke-width="2.5">
+                                    <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path>
+                                    <circle cx="16.5" cy="7.5" fill="currentColor" r=".5"></circle>
+                                </g>
+                            </svg>
+                            <input
+                                    class="w-full"
+                                    id="{{ form.password1.id_for_label }}"
+                                    name="{{ form.password1.name }}"
+                                    placeholder="Введите пароль"
+                                    required
+                                    x-bind:type="inputType"
+                                    x-model="password"
+                                    x-on:input="checkStrength"
+                            >
+                            <button aria-label="Show password" class="opacity-50" type="button"
+                                    x-on:click="showPassword1 = !showPassword1">
+                                <svg aria-hidden="true" class="size-5" fill="none" stroke="currentColor"
+                                     stroke-width="1.5" viewBox="0 0 24 24" x-show="!showPassword1"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                                          stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                </svg>
+                                <svg aria-hidden="true" class="size-5" fill="none" stroke="currentColor"
+                                     stroke-width="1.5" viewBox="0 0 24 24" x-show="showPassword1"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+                                          stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </label>
+
+                        <!-- Поле Подтверждение пароля -->
+
+                        <label class="input w-full"
+                               x-data="{ showPassword2: false, getType() { return this.showPassword2 ? 'text' : 'password' } }">
+                            <svg class="h-[1em] opacity-50" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                   stroke-width="2.5">
+                                    <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path>
+                                    <circle cx="16.5" cy="7.5" fill="currentColor" r=".5"></circle>
+                                </g>
+                            </svg>
+                            {% render_field form.password2 class="grow" placeholder="Повторите пароль"
+                            x_model="password2" x-bind::type="getType()" %}
+                            <button aria-label="Show password" class="opacity-50" type="button"
+                                    x-on:click="showPassword2 = !showPassword2">
+                                <svg aria-hidden="true" class="size-5" fill="none" stroke="currentColor"
+                                     stroke-width="1.5" viewBox="0 0 24 24" x-show="!showPassword2"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                                          stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                </svg>
+                                <svg aria-hidden="true" class="size-5" fill="none" stroke="currentColor"
+                                     stroke-width="1.5" viewBox="0 0 24 24" x-show="showPassword2"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+                                          stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </label>
+
+                        <div class="text-xs text-error">{{ form.password2.errors }}</div>
+
+                        <div class="card-actions justify-end">
+                            <button class="btn btn-success btn-block" type="submit">Зарегистрироваться</button>
+                        </div>
+                    </form>
+
+                    <div class="flex items-center justify-center mt-3 mb-0  gap-2"><span>Уже есть аккаунт? </span><a
+                            class="link link-primary" href="{% url 'account_login' %}">Войти</a></div>
+
+                    <div class="divider">или</div>
+                    {% if PASSKEY_SIGNUP_ENABLED %}
+                    <a class="btn btn-primary btn-block" href="{{ login_by_passkey_url }}">Зарегистрироваться с
+                        помощью
+                        passkey</a>
+                    {% endif %}
+                    <div class="social-links flex flex-col gap-2">
+                        {% include "socialaccount/snippets/provider_list.html" with process="login"
+                        page_layout="entrance"
+                        %}
+                    </div>
+                </div>
+            </div>
+            <div class="text-center lg:text-left">
+                <h2 class="text-5xl font-bold">Что дает регистрация?</h2>
+                <p class="py-6">
+                    Бонусы, скидки, акции, участие в конкурсах и многое другое.
+                </p>
+                <p class="py-6">
+                    Подтверждаю, что я ознакомлен и согласен с условиями <a
+                        class="link link-primary">пользовательского соглашения</a> и <a class="link link-primary">политикой
+                    конфиденциальности</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</c-app>
